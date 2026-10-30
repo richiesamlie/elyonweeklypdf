@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weeklypdf-v4';
+const CACHE_NAME = 'weeklypdf-v5';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -25,9 +25,26 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only cache same-origin requests (the wrapper itself)
+  // Only handle same-origin requests (the wrapper itself)
   // GAS iframe is cross-origin — let it load normally
-  if (event.request.mode === 'navigate' || event.request.url.startsWith(self.location.origin)) {
+  if (event.request.mode === 'navigate') {
+    // Network-first for navigation requests so updated iframe URL / index.html is loaded immediately
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html').then((cached) => cached || caches.match('./')))
+    );
+    return;
+  }
+
+  if (event.request.url.startsWith(self.location.origin)) {
+    // Cache-first for same-origin static assets (icons, manifest)
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request))
     );
