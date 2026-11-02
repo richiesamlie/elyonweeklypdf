@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weeklypdf-v5';
+const CACHE_NAME = 'weeklypdf-v6';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -33,12 +33,20 @@ self.addEventListener('fetch', (event) => {
       fetch(event.request)
         .then((response) => {
           if (response && response.status === 200) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            const copyReq = response.clone();
+            const copyIndex = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, copyReq);
+              cache.put('./index.html', copyIndex);
+            });
           }
           return response;
         })
-        .catch(() => caches.match('./index.html').then((cached) => cached || caches.match('./')))
+        .catch(() =>
+          caches.match(event.request)
+            .then((cached) => cached || caches.match('./index.html'))
+            .then((cached) => cached || caches.match('./'))
+        )
     );
     return;
   }
@@ -46,7 +54,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.startsWith(self.location.origin)) {
     // Cache-first for same-origin static assets (icons, manifest)
     event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request))
+      caches.match(event.request).then(
+        (cached) =>
+          cached ||
+          fetch(event.request).catch(() => new Response('', { status: 504, statusText: 'Offline' }))
+      )
     );
   }
 });
