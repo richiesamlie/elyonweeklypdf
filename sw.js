@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weeklypdf-v6';
+const CACHE_NAME = 'weeklypdf-v7';
 const SHELL_ASSETS = [
   './',
   './index.html',
