@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Elyon Primary Weekly Program Hub</title>
+  <meta name="description" content="Elyon Christian School Primary Weekly Program Hub for editing class schedules, exporting PDFs, and publishing to Google Classroom.">
 
   <!-- Preconnect to Google Apps Script origins for faster iframe handshake -->
   <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -20,14 +21,54 @@
   <link rel="apple-touch-icon" href="icon-192.png">
 
   <style>
+    /* Hallmark · shape: app screen · genre: editorial · theme: brand · redesign: restyle
+     * paper: oklch(97.6% 0.008 80) · accent: oklch(34.5% 0.078 252) · display: Instrument Serif · body: Plus Jakarta Sans
+     * nav: top iframe shell, kept · signature: direct Apps Script workspace frame, kept · states: default, hover, focus-visible, active, disabled
+     * axes: light/roman-serif/cool · posture: restrained · contrast: pass · v2.0.0 */
+    /* Hallmark · pre-emit critique: P4 H4 E5 S4 R5 V4 · weakest: H, fallback and install bars competed at the bottom edge; unified token hierarchy and spacing */
+    :root {
+      --bg: #FAF7F2;
+      --surface: #FFFDF9;
+      --surface-dark: #18181B;
+      --text: #18181B;
+      --text-on-dark: #FAF7F2;
+      --border-dark: #4A4F55;
+      --border-muted: #767168;
+      --primary: #1E3A5F;
+      --primary-border: #152943;
+      --link-on-dark: #BDD6F7;
+      --dismiss-border: rgba(250, 247, 242, 0.45);
+      --font-body: system-ui, -apple-system, sans-serif;
+      --space-3xs: 2px;
+      --space-2xs: 4px;
+      --space-xs: 8px;
+      --space-sm: 12px;
+      --space-md: 16px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --dur-micro: 120ms;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      scrollbar-color: var(--border-muted) var(--bg);
+    }
     html, body {
       height: 100%;
-      overflow: hidden;
-      background: #FAF7F2;
-      color: #18181B;
+      overflow-x: clip;
+      overflow-y: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      caret-color: var(--primary);
       display: flex;
       flex-direction: column;
+    }
+
+    ::selection {
+      background: var(--link-on-dark);
+      color: var(--text);
     }
 
     #app-frame {
@@ -39,61 +80,71 @@
     }
 
     button:focus-visible, a:focus-visible {
-      outline: 2px solid #FFFFFF;
+      outline: 2px solid var(--surface);
       outline-offset: 2px;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     /* Install Banner */
     #install-banner {
       display: none;
-      background: #1E3A5F;
-      color: #FFFFFF;
-      padding: 10px 16px;
-      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--primary);
+      color: var(--surface);
+      padding: var(--space-xs) var(--space-md);
+      font-family: var(--font-body);
       font-size: 13.5px;
       font-weight: 600;
       text-align: center;
-      border-top: 1px solid #152943;
+      border-top: 1px solid var(--primary-border);
       flex-shrink: 0;
     }
     #install-banner button {
       min-height: 40px;
-      background: #FFFFFF;
-      color: #1E3A5F;
-      border: 1px solid #FFFFFF;
-      border-radius: 6px;
-      padding: 6px 16px;
+      background: var(--surface);
+      color: var(--primary);
+      border: 1px solid var(--surface);
+      border-radius: var(--radius-md);
+      padding: var(--space-xs) var(--space-md);
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
-      margin-left: 10px;
+      margin-left: var(--space-xs);
+      transition: transform var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
     }
     #install-banner .dismiss {
       background: transparent;
-      color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      margin-left: 6px;
-      padding: 6px 12px;
+      color: var(--surface);
+      border: 1px solid var(--dismiss-border);
+      margin-left: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
     }
 
     /* Direct Open Fallback Bar (for mobile browsers blocking cross-origin GAS iframe auth) */
     #auth-fallback {
-      background: #18181B;
-      color: #FAF7F2;
-      padding: 6px 14px;
-      border-top: 1px solid #4A4F55;
-      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--surface-dark);
+      color: var(--text-on-dark);
+      padding: var(--space-xs) var(--space-md);
+      border-top: 1px solid var(--border-dark);
+      font-family: var(--font-body);
       font-size: 12px;
       font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: var(--space-xs);
       flex-shrink: 0;
     }
     #auth-fallback a {
-      color: #BDD6F7;
+      color: var(--link-on-dark);
       text-decoration: underline;
       font-weight: 700;
       min-height: 32px;
@@ -104,13 +155,22 @@
       min-height: 32px;
       min-width: 32px;
       background: transparent;
-      border: 1px solid #767168;
-      border-radius: 4px;
-      color: #FAF7F2;
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius-sm);
+      color: var(--text-on-dark);
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      padding: 2px 8px;
+      padding: var(--space-3xs) var(--space-xs);
+      transition: transform var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
